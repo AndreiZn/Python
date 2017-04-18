@@ -15,7 +15,8 @@ Omega = 0.27
 h = 0.73
 M_S = 1.98e30
 Mpc = 3.0856776e22
-rho = 0.3*9.31e-27*Mpc**3/h**3
+#rho = 0.3*9.31e-27*Mpc**3/h**2
+rho = 1.88e-26*Mpc**3 #in h**2 units 
 sgm_s=1.686
 #k_0 = Omega*h**3/(3.086e22)
 k_0 = Omega*h**2
@@ -61,18 +62,27 @@ def n(M):
     
 M_0 = M_S*1e5
 M_F = M_S*1e15
-x = np.logspace(np.log10(M_0), np.log10(M_F), num = 200)
-#y = [Mpc**4*sgm2(x[i]) for i in range (len(x))] 
-y = [sgm2(x[i])/h**2 for i in range (len(x))]
-#y2 = [der_sgm2(x[i]) for i in range(len(x))]
-y1 = [n(x[i]) for i in range (len(x))]
-y2 = [y1[i]*x[i] for i in range (len(x))]
-plt.title('sigma^2')
-plt.xlabel('R, Mpc')
-plt.ylabel('sigma^2, 1/Mpc**2')
-#plt.xscale('log')
-#plt.yscale('log')
-plt.plot (x*h/M_S, y2)
-#plt.plot (Rad(x), y)
-#plt.plot (np.array([1, 2, 4, 200/33, 8, 10, 100/9, 25/2, 100/7, 50/3, 200/11, 20])*0.32/h,[41.066, 12.4, 3.15, 1.36, 0.765, 0.482, 0.382, 0.296, 0.222, 0.164, 0.141, 0.119])
+M = np.logspace(np.log10(M_0), np.log10(M_F), num = 200)
+simga2 = [sgm2(M[i])/h**2 for i in range (len(M))]
+dN_dM = [n(M[i]) for i in range (len(M))]
+dN_dlogM = [dN_dM[i]*M[i] for i in range (len(M))]
+
+fig2 = plt.figure(2)
+
+mode = 'MFunc'
+log = 1
+if mode=='MFunc':
+    plt.title('The Press-Schechter mass function')
+    plt.xlabel('M, M_Sun/h')
+    plt.ylabel('dN(>M)/dlogM')
+if log == 1:    
+    plt.xscale('log')
+    plt.yscale('log')
+M_x = M*h/M_S
+plt.plot (M_x, dN_dlogM, '.')
+
 plt.show()
+
+# save plotted arrays
+np.save('M_theory', M_x)
+np.save('dN_dlogM_theory', dN_dlogM)
