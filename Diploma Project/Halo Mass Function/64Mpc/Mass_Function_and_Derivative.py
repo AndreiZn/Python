@@ -20,7 +20,7 @@ R = 1.999*hx
 V = 4/3*np.pi*R**3 
 
 #reading the halo DataFrame from the file
-halo_df = pd.read_csv('halo_df_64Mpc.csv', index_col=0)
+halo_df = pd.read_csv('./Halo dataframes for different radii/halo_df_64Mpc_R_3.2.csv', index_col=0)
 
 #choosing halos with mass>100*prtclmass = 1e9
 prtclmass = 2.08108e07
@@ -50,7 +50,7 @@ sigma2 = np.average((halo_sorted.Contrast- aver_contrast)**2/aver_contrast)
 
 halosize = np.size(halo_sorted, 0)
 
-num_of_bins = 4
+num_of_bins = 1
 
 #dividing halos into bins
 list_of_dframes = np.array_split(halo_sorted,   num_of_bins)   
@@ -69,7 +69,7 @@ for i in range (num_of_bins):
     df_sorted.set_index(pd.Series(int_array, index = df_sorted.index), inplace=True)
     
     #values to plot:
-    n, M = np.array(df_sorted.index), np.array(df_sorted.M200c)
+    N, M = np.array(df_sorted.index), np.array(df_sorted.M200c)
     #plot:
 
     fig1 = plt.figure(1)
@@ -87,13 +87,12 @@ for i in range (num_of_bins):
     plt.title(ttl)
     
     plt.xlabel('M, Msun/h')
-    plt.ylabel('n(>M)')    
-    plt.plot (M, n)
+    plt.ylabel('N(>M)')    
+    plt.plot (M, N, '.')
     leg[i] = 'contr=' + str(round(np.average(df_sorted.Contrast),3))
 
 #legend
-plt.legend(leg)
-plt.show()
+plt.legend(leg, shadow=True, fancybox=True, numpoints=1)
 
 
 
@@ -105,24 +104,47 @@ plt.show()
 fig2 = plt.figure(2)
 fig2.set_size_inches(15.5, 8.5)
 
-deriv = np.diff(n)/np.diff(np.log(M))
-deriv = np.squeeze(deriv) #otherwise its shape is (1,11776)
-deriv = np.append(deriv, deriv[-1]) #to make it the same size as M
+leg2 = ['']*(num_of_bins+1) # one theoretical plot + num_of_bins plots
+list_of_dframes = np.array_split(halo_sorted, num_of_bins) 
+for i in range (num_of_bins):
+    
+    df = list_of_dframes[i]
+    halo_df_deriv = df.M200c
+    nbins = 20
+    # derivative dN/dlogM for each of the dframes
+    dN = np.histogram(np.log10(halo_df_deriv), bins = nbins)[0]
+    M = np.histogram(np.log10(halo_df_deriv), bins = nbins)[1]                  
+    dlogM = np.diff(M)
+    dN_dlogM = dN/dlogM
+    #M_bin = [(10**M[i]+10**M[i+1])/2 for i in range (nbins)]
+    M_bin =  [(M[i]+M[i+1])/2 for i in range (nbins)]
+    M_bin =  [10**(M[i]) for i in range (nbins)]  
+          
+    log = 1
+    if log==1:
+       scale = 'logscale'
+       plt.yscale('log')
+       plt.xscale('log')
+    else:
+       scale = 'normal scale' 
+    
+    ttl = 'Mass function. Cube size='+str(maxcoord)+'Mpc. R='+str(round(R, 1))+'Mpc.'+' Scale='+scale
+    plt.title(ttl)
+       
+    plt.xlabel('M, Msun/h')
+    plt.ylabel('dN(>M)/dlogM')    
+    
+    plt.plot (M_bin, dN_dlogM/47104*num_of_bins, '.')
+    
+    leg2[i] = 'contr=' + str(round(np.average(df.Contrast),3))
+    
+# theory: 
+M_theory = np.load('../../Press_Schechter/M_theory.npy')
+dN_dlogM_theory = np.load('../../Press_Schechter/dN_dlogM_theory.npy')
+plt.plot(M_theory, dN_dlogM_theory, '.')
+leg2[num_of_bins] = 'Press-Schechter'
+plt.legend(leg2, shadow=True, fancybox=True, numpoints=1)
 
-log = 0
-if log==1:
-   scale = 'logscale'
-   plt.xscale('log')
-   plt.yscale('log')
-else:
-   scale = 'normal scale' 
-
-ttl = 'Mass function. Cube size='+str(maxcoord)+'Mpc. R='+str(round(R, 1))+'Mpc.'+' Scale='+scale
-plt.title(ttl)
-   
-plt.xlabel('M, Msun/h')
-plt.ylabel('dn(>M)/dlogM')    
-
-plt.plot (M, deriv)
+plt.ylim(0, 1e8)
 
 plt.show()
