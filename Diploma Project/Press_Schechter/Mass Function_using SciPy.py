@@ -11,12 +11,14 @@ from numpy import pi as pi
 import scipy.integrate as integrate
 
 A = 4.375e6
-Omega = 0.27
-h = 0.73
-M_S = 1.98e30
-Mpc = 3.0856776e22
+#Omega = 0.27
+Omega = 0.307115
+#h = 0.73
+h = 0.6777
+M_S = 1.98e30 # in kg
+Mpc = 3.0856776e22 # in meters
 #rho = 0.3*9.31e-27*Mpc**3/h**2
-rho = 1.88e-26*Mpc**3 #in h**2 units 
+rho = 1.88e-26*Mpc**3/M_S #in h**2 units 
 sgm_s=1.686
 #k_0 = Omega*h**3/(3.086e22)
 k_0 = Omega*h**2
@@ -60,10 +62,12 @@ def dersgm(M):
 def n(M):
     return np.sqrt(2/pi)*rho*dersgm(M)*sgm_s*np.exp(-sgm_s**2/(2*sgm2(M)))/(M*sgm2(M))
     
-M_0 = M_S*1e5
-M_F = M_S*1e15
+# M_0 = M_S*1e5
+# M_F = M_S*1e15
+M_0 = 1e5*h
+M_F = 1e15*h
 M = np.logspace(np.log10(M_0), np.log10(M_F), num = 200)
-simga2 = [sgm2(M[i])/h**2 for i in range (len(M))]
+simga2 = [sgm2(M[i]) for i in range (len(M))]
 dN_dM = [n(M[i]) for i in range (len(M))]
 dN_dlogM = [dN_dM[i]*M[i] for i in range (len(M))]
 
@@ -78,11 +82,11 @@ if mode=='MFunc':
 if log == 1:    
     plt.xscale('log')
     plt.yscale('log')
-M_x = M*h/M_S
-plt.plot (M_x, dN_dlogM, '.')
+    
+plt.plot (M, dN_dlogM, '.')
 
 plt.show()
 
 # save plotted arrays
-np.save('M_theory', M_x)
+np.save('M_theory', M)
 np.save('dN_dlogM_theory', dN_dlogM)
