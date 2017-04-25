@@ -19,8 +19,11 @@ h = hx #now hx = hy = hz = h
 R = 1.999*hx
 V = 4/3*np.pi*R**3 
 
+# reading Volumes of bins
+V_bins = np.load('V_bins_R=32h.npy')
+
 #reading the halo DataFrame from the file
-halo_df = pd.read_csv('./Halo dataframes for different radii/halo_df_64Mpc_R_3.2.csv', index_col=0)
+halo_df = pd.read_csv('./Halo dataframes for different radii/halo_df_64Mpc_R_8.csv', index_col=0)
 
 #choosing halos with mass>100*prtclmass = 1e9
 prtclmass = 2.08108e07
@@ -50,12 +53,11 @@ sigma2 = np.average((halo_sorted.Contrast- aver_contrast)**2/aver_contrast)
 
 halosize = np.size(halo_sorted, 0)
 
-num_of_bins = 1
+num_of_bins = 4
 
 #dividing halos into bins
 list_of_dframes = np.array_split(halo_sorted,   num_of_bins)   
 
-#fig = plt.figure()
 
 #leg is used in legend
 leg = ['']*num_of_bins
@@ -107,18 +109,18 @@ fig2.set_size_inches(15.5, 8.5)
 leg2 = ['']*(num_of_bins+1) # one theoretical plot + num_of_bins plots
 list_of_dframes = np.array_split(halo_sorted, num_of_bins) 
 for i in range (num_of_bins):
-    
+
     df = list_of_dframes[i]
     halo_df_deriv = df.M200c
-    nbins = 20
+    nbins = 10
     # derivative dN/dlogM for each of the dframes
     dN = np.histogram(np.log10(halo_df_deriv), bins = nbins)[0]
     M = np.histogram(np.log10(halo_df_deriv), bins = nbins)[1]                  
     dlogM = np.diff(M)
     dN_dlogM = dN/dlogM
-    #M_bin = [(10**M[i]+10**M[i+1])/2 for i in range (nbins)]
-    M_bin =  [(M[i]+M[i+1])/2 for i in range (nbins)]
-    M_bin =  [10**(M[i]) for i in range (nbins)]  
+    M_bin = [(10**M[s]+10**M[s+1])/2 for s in range (nbins)]
+    #M_bin =  [(M[s]+M[s+1])/2 for s in range (nbins)]
+    #M_bin =  [10**(M_bin[s]) for s in range (nbins)]  
           
     log = 1
     if log==1:
@@ -134,17 +136,21 @@ for i in range (num_of_bins):
     plt.xlabel('M, Msun/h')
     plt.ylabel('dN(>M)/dlogM')    
     
-    plt.plot (M_bin, dN_dlogM/47104*num_of_bins, '.')
+    V_cube = maxcoord**3
+    V_bin = np.size(df,0)*V
+    dN_dlogM = dN_dlogM/V_bins[i]
+    plt.plot (M_bin, dN_dlogM)
     
     leg2[i] = 'contr=' + str(round(np.average(df.Contrast),3))
     
 # theory: 
-M_theory = np.load('../../Press_Schechter/M_theory.npy')
-dN_dlogM_theory = np.load('../../Press_Schechter/dN_dlogM_theory.npy')
-plt.plot(M_theory, dN_dlogM_theory, '.')
+M_theory = np.load('../../Press_Schechter/M_theory_cut.npy')
+dN_dlogM_theory = np.load('../../Press_Schechter/dN_dlogM_theory_cut.npy')
+plt.plot(M_theory, dN_dlogM_theory)
 leg2[num_of_bins] = 'Press-Schechter'
 plt.legend(leg2, shadow=True, fancybox=True, numpoints=1)
 
-plt.ylim(0, 1e8)
+plt.xlim(2.4e10, 1e15)
+plt.ylim(0, 1e0)
 
 plt.show()
