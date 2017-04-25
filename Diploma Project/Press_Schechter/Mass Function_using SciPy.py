@@ -64,7 +64,7 @@ def n(M):
     
 # M_0 = M_S*1e5
 # M_F = M_S*1e15
-M_0 = 1e5*h
+M_0 = 1e10*h
 M_F = 1e15*h
 M = np.logspace(np.log10(M_0), np.log10(M_F), num = 200)
 simga2 = [sgm2(M[i]) for i in range (len(M))]
@@ -88,5 +88,5 @@ plt.plot (M, dN_dlogM, '.')
 plt.show()
 
 # save plotted arrays
-np.save('M_theory', M)
-np.save('dN_dlogM_theory', dN_dlogM)
+np.save('M_theory_cut', M)
+np.save('dN_dlogM_theory_cut', dN_dlogM)
