@@ -13,17 +13,19 @@ import matplotlib.pyplot as plt
 
 
 maxcoord = 64
-numofcells = 40
+numofcells = 128
+R_str = '1'
 hx, hy, hz = maxcoord/numofcells, maxcoord/numofcells, maxcoord/numofcells
 h = hx #now hx = hy = hz = h
 R = 1.999*hx
 V = 4/3*np.pi*R**3 
 
+
 # reading Volumes of bins
-V_bins = np.load('V_bins_R=32h.npy')
+V_bins = np.load('./V_bins/V_bins_R_'+R_str+'.npy')
 
 #reading the halo DataFrame from the file
-halo_df = pd.read_csv('./Halo dataframes for different radii/halo_df_64Mpc_R_8.csv', index_col=0)
+halo_df = pd.read_csv('./Halo dataframes for different radii/halo_df_64Mpc_R_'+R_str+'.csv', index_col=0)
 
 #choosing halos with mass>100*prtclmass = 1e9
 prtclmass = 2.08108e07
@@ -53,7 +55,7 @@ sigma2 = np.average((halo_sorted.Contrast- aver_contrast)**2/aver_contrast)
 
 halosize = np.size(halo_sorted, 0)
 
-num_of_bins = 4
+num_of_bins = 1
 
 #dividing halos into bins
 list_of_dframes = np.array_split(halo_sorted,   num_of_bins)   
@@ -135,10 +137,10 @@ for i in range (num_of_bins):
        
     plt.xlabel('M, Msun/h')
     plt.ylabel('dN(>M)/dlogM')    
-    
+    V_bins_sum = np.sum(V_bins)
     V_cube = maxcoord**3
-    V_bin = np.size(df,0)*V
-    dN_dlogM = dN_dlogM/V_bins[i]
+    #dN_dlogM = dN_dlogM/V_bins[i]
+    dN_dlogM = dN_dlogM/V_bins_sum
     plt.plot (M_bin, dN_dlogM)
     
     leg2[i] = 'contr=' + str(round(np.average(df.Contrast),3))
@@ -150,7 +152,7 @@ plt.plot(M_theory, dN_dlogM_theory)
 leg2[num_of_bins] = 'Press-Schechter'
 plt.legend(leg2, shadow=True, fancybox=True, numpoints=1)
 
-plt.xlim(2.4e10, 1e15)
-plt.ylim(0, 1e0)
+plt.xlim(2.4e10, 3e14)
+plt.ylim(1e-4, 1e0)
 
 plt.show()

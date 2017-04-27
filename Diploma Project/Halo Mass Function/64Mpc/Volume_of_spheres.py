@@ -16,21 +16,15 @@ import pandas as pd
 from scipy.weave import converters
 
 t0 = time()
-        
-#number of cells and step
-maxcoord = 64
-numofcells = 40
-#numofcells = 640
-hx, hy, hz = maxcoord/numofcells, maxcoord/numofcells, maxcoord/numofcells
-h = hx #now hx = hy = hz = h
 
 #values
-R = 1.999*hx
+R = 8
+h = R/63.999
+hx, hy, hz = h, h, h
 #R = 31.999*hx
 V = 4/3*pi*R**3 
-Mpc = 3.085678e24 #in sm
-M_S = 1.989e33 #in g
-UnitMass = 1e10*M_S 
+maxcoord = 64
+numofcells = int(round(maxcoord/hx))
 
 #max and min coordinates
 xmin, ymin, zmin = 0, 0, 0
@@ -38,7 +32,7 @@ xmax, ymax, zmax = maxcoord, maxcoord, maxcoord
 
 #reading the halo list
 prtclmass = 2.08108e07
-halo_df = pd.read_csv('./Halo dataframes for different radii/halo_df_64Mpc_R_3.2.csv', index_col = 0)
+halo_df = pd.read_csv('./Halo dataframes for different radii/halo_df_64Mpc_R_'+str(R)+'.csv', index_col = 0)
 
 #normalized density:
 temp_arr = np.array(halo_df.Density)/V
@@ -49,7 +43,7 @@ aver_dens = 512**3/maxcoord**3
 halo_df.loc[:, 'Contrast'] = (halo_df.Density - aver_dens)/aver_dens
 
 #parameter
-r1, r2, r3 = int(R/hx) + 1, int(R/hy) + 1, int(R/hz) + 1
+r1, r2, r3 = int(round(R/hx)) + 1, int(round(R/hy)) + 1, int(round(R/hz)) + 1
 r = r1 #now r1 = r2 = r3 = r
 
 t1 = time() - t0
@@ -78,14 +72,14 @@ for bin_ind in range (num_of_bins):
     halo_arr = np.array(df)
     halos_in_bin = int(np.size(df)/6) #6 columns
     #creating the linkedspace
-    mx, my, mz = int((xmax - xmin)/h), int((ymax - ymin)/h), int((zmax - zmin)/h)
-    space = np.zeros((mx,my,mz), dtype=np.int)      
+    mx, my, mz = int(round((xmax - xmin)/h)), int(round((ymax - ymin)/h)), int(round((zmax - zmin)/h))
+    space = np.zeros((mx,my,mz), dtype=bool)      
             
     #find cells covered by spheres with centers at (x,y,z), where (x,y,z) are coordinates of halos
     
     ccode = \
         """
-        int halo_ind, ind, m, n, p, i, j, k, i_eff, j_eff, k_eff;
+        int halo_ind, m, n, p, i, j, k, i_eff, j_eff, k_eff;
         double x, y, z;
         
         for(halo_ind = 0; halo_ind<halos_in_bin; halo_ind = halo_ind + 1)
@@ -121,6 +115,8 @@ for bin_ind in range (num_of_bins):
     
 t2 = time() - t0 - t1
 print ('time to calculate volumes of bins = ', t2)   
+
+np.save('./V_bins/V_bins_R_'+str(R), bins_V)
     
     
     
