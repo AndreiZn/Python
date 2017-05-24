@@ -70,8 +70,9 @@ print ('time to assign values to variables = ', t1)
                           
 
 
-noc = np.array([128, 64, 50, 40, 32, 20, 16])
+#noc = np.array([128, 64, 50, 40, 32, 20, 16])
 #noc = np.array([40])
+noc = np.array([32, 20, 16])
 
 for noc_ind in range (np.size(noc)):  
     
@@ -200,6 +201,7 @@ for noc_ind in range (np.size(noc)):
     int_array = np.array([i for i in range(np.size(halo_sorted, 0)) ])
     halo_sorted.set_index(pd.Series(int_array, index = halo_sorted.index), inplace=True)           
                
-               
-    halo_sorted.to_csv('Halo_Dataframes/halo_df_mixed_R_'+ str(round(R,1)) +'.csv')
+    halo_sorted = halo_sorted.loc[halo_sorted['Contrast'] < 1]
+           
+    halo_sorted.to_csv('Halo_Dataframes/halo_df_mixed_cut_R_'+ str(round(R,1)) +'.csv')
     #halo_sorted.to_csv('Halo_Dataframes/halo_df_rand_mixed_R_'+ str(round(R,1)) +'.csv')
