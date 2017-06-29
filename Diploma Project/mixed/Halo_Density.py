@@ -11,9 +11,10 @@ import pygadgetreader as pgr
 import numpy as np
 from numpy import pi
 from time import time
-from scipy import weave
+#from scipy import weave
+import weave
 import pandas as pd
-from scipy.weave import converters
+from weave import converters
 
 def cll (c, h):
     #coord(i) is in space (m1,m2,m3)
@@ -71,8 +72,8 @@ print ('time to assign values to variables = ', t1)
 
 
 #noc = np.array([128, 64, 50, 40, 32, 20, 16])
-#noc = np.array([40])
-noc = np.array([32, 20, 16])
+#noc = np.array([32])
+noc = np.array([128, 64, 50, 40])
 
 for noc_ind in range (np.size(noc)):  
     

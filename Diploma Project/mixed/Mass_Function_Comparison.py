@@ -13,17 +13,19 @@ import pylab as plb
 
 maxcoord = 64
 
-#R_str_array = ['1.0', '2.0', '2.6', '3.2', '4.0', '6.4', '8.0']
-R_str_array = ['4.0', '6.4', '8.0']
+R_str_array = ['1.0', '2.0', '2.6', '3.2', '4.0', '6.4', '8.0']
+#R_str_array = ['4.0', '6.4', '8.0']
 #R_str_array = ['3.2', '8.0']
+#R_str_array = ['4.0']
 
 for k in range (np.size(R_str_array)):
     
     R_str = R_str_array[k]
     
     # reading Volumes of bins
-    V_bins = np.load('./V_bins_nodes/V_bins_R_'+R_str+'_nodes.npy')
-    #V_bins = np.load('./V_bins/V_bins_R_'+R_str+'.npy')
+    #V_bins = np.load('./V_bins_nodes/V_bins_R_'+R_str+'_nodes.npy')
+    V_bins = np.load('./V_bins/V_bins_R_'+R_str+'.npy')
+    #V_bins = V_bins
     
     #reading the halo DataFrame from the file
     halo_df = pd.read_csv('./Halo_Dataframes/halo_df_mixed_cut_R_'+R_str+'.csv', index_col=0)
@@ -124,21 +126,21 @@ for k in range (np.size(R_str_array)):
         dN_dlogM = dN_dlogM/V_bins[i]
         plt.plot (M_bin, dN_dlogM)
         
-        leg2[2*i] = 'contr=' + str(round(np.average(df.Contrast),3))
+        leg2[2*i] = 'Simulation, Contrast = ' + str(round(np.min(df.Contrast),3)) + ' : ' + str(round(np.max(df.Contrast),3))
         
         # theory: 
-        M_theory = np.load('../Press_Schechter/npy_arrays_4/'+R_str+'/M_theory_adv_'+R_str+'_'+str(round(sgm_s, 1))+'.npy')
-        dN_dlogM_theory = np.load('../Press_Schechter/npy_arrays_4/'+R_str+'/dN_dlogM_theory_adv_'+R_str+'_'+str(round(sgm_s, 1))+'.npy')    
+        M_theory = np.load('../Press_Schechter/npy_arrays_min2/'+R_str+'/M_theory_adv_'+R_str+'_'+str(round(sgm_s, 1))+'.npy')
+        dN_dlogM_theory = np.load('../Press_Schechter/npy_arrays_min2/'+R_str+'/dN_dlogM_theory_adv_'+R_str+'_'+str(round(sgm_s, 1))+'.npy')    
         #M_theory = np.load('../Press_Schechter/npy_arrays_3/M_theory_adv_'+R_str+'_'+str(round(sgm_s, 1))+'.npy')
         #dN_dlogM_theory = np.load('../Press_Schechter/npy_arrays_3/dN_dlogM_theory_adv_'+R_str+'_'+str(round(sgm_s, 1))+'.npy')
         plt.plot(M_theory, dN_dlogM_theory, '.')
-        leg2[2*i+1] = 'Press-Schechter, delta_c - ' + str(round(delta_min,1))
+        leg2[2*i+1] = 'Press-Schechter, contr = ' + str(round(delta_min,3)) + ' : ' + str(round(np.max(df.Contrast),3))
         #leg2[2*i+1] = 'Press-Schechter, delta_c + ' + str(round(delta_max,1))
     
-    plt.legend(leg2, shadow=True, fancybox=True, numpoints=1)
+    plt.legend(leg2, shadow=True, fancybox=True, numpoints=1, prop={'size':9})
     
-    plt.xlim(2.4e10, 3e14)
-    plt.ylim(1e-4, 1e0)
+    plt.xlim(2.4e10, 1e13)
+    plt.ylim(1e-4, np.max(dN_dlogM_theory))
     
     plt.show()
     
